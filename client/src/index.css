@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+@theme {
+  --color-beige-100: oklch(0.97 0.02 94);
+  --color-beige-50: oklch(0.99 0.01 94);
+  --color-peach-400: oklch(0.74 0.17 40);
+  --color-peach-500: oklch(0.72 0.18 38);
+  --color-pink-300: oklch(0.92 0.08 350);
+  --color-pink-400: oklch(0.88 0.1 350);
+  --color-brown-200: oklch(0.82 0.06 74);
+  --color-brown-400: oklch(0.55 0.16 38);
+  --color-brown-500: oklch(0.45 0.08 40);
+  --color-brown-600: oklch(0.4 0.07 38);
+}
