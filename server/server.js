@@ -2,11 +2,22 @@ import express from "express";
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 import cors from "cors";
+import dotenv from "dotenv";
+
+// Load environment variables
+dotenv.config();
 
 const app = express();
 
-app.use(cors());
 app.use(express.json());
+
+// Configure CORS to allow requests from the deployed frontend
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    credentials: true,
+  })
+);
 
 // Connect to MongoDB Atlas
 mongoose
@@ -60,7 +71,7 @@ const Notification = mongoose.model("Notification", notificationSchema);
 const auth = (req, res, next) => {
   const token = req.headers.authorization?.split(" ")[1];
   if (!token) return res.status(401).json({ message: "No token" });
-  jwt.verify(token, "secret", (err, decoded) => {
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
     if (err) return res.status(401).json({ message: "Invalid token" });
     req.user = decoded;
     next();
@@ -73,7 +84,10 @@ app.post("/api/auth/signup", async (req, res) => {
   try {
     const user = new User({ email, password, isVolunteer });
     await user.save();
-    const token = jwt.sign({ id: user._id, isVolunteer }, "secret");
+    const token = jwt.sign(
+      { id: user._id, isVolunteer },
+      process.env.JWT_SECRET
+    );
     res.json({
       token,
       id: user._id,
@@ -90,7 +104,7 @@ app.post("/api/auth/login", async (req, res) => {
   const { email, password, isVolunteer } = req.body;
   const user = await User.findOne({ email, password, isVolunteer });
   if (!user) return res.status(400).json({ message: "Invalid credentials" });
-  const token = jwt.sign({ id: user._id, isVolunteer }, "secret");
+  const token = jwt.sign({ id: user._id, isVolunteer }, process.env.JWT_SECRET);
   res.json({
     token,
     id: user._id,
@@ -137,25 +151,14 @@ app.put("/api/items/:id/request", auth, async (req, res) => {
 app.put("/api/items/:id/assign", auth, async (req, res) => {
   const { takerId } = req.body;
   const item = await Item.findById(req.params.id).populate("postedBy", "email");
-  console.log("Assign request:", {
-    itemId: req.params.id,
-    takerId,
-    userId: req.user.id,
-  });
-  console.log("Item data:", item);
   if (
     !item ||
     item.postedBy._id.toString() !== req.user.id ||
     item.status !== "posted"
   ) {
-    console.log("Failed validation 1: Cannot assign item");
     return res.status(400).json({ message: "Cannot assign item" });
   }
   if (!item.requestedBy.map((id) => id.toString()).includes(takerId)) {
-    console.log("Failed validation 2: User didn’t request this item", {
-      requestedBy: item.requestedBy.map((id) => id.toString()),
-      takerId,
-    });
     return res.status(400).json({ message: "User didn’t request this item" });
   }
   item.assignedTo = takerId;
@@ -210,7 +213,6 @@ app.put("/api/items/:id/deliver", auth, async (req, res) => {
 
 // Notification Routes
 app.get("/api/notifications", auth, async (req, res) => {
-  // console.log("Notifications route hit for user:", req.user.id); // Commented out
   const notifications = await Notification.find({ userId: req.user.id })
     .populate("itemId", "name")
     .sort({ createdAt: -1 });
@@ -222,4 +224,6 @@ app.get("/test", (req, res) => {
   res.json({ message: "Server is running" });
 });
 
-app.listen(5000, () => console.log("Server running on port 5000"));
+// Use the PORT environment variable for production
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
