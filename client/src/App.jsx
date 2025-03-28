@@ -13,6 +13,10 @@ const App = () => {
   const [showRequests, setShowRequests] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
 
+  // Use environment variable for API URL
+  // eslint-disable-next-line no-undef
+  const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+
   useEffect(() => {
     fetchItems();
     fetchNotifications();
@@ -23,7 +27,7 @@ const App = () => {
   const fetchItems = async () => {
     if (!user) return;
     try {
-      const res = await fetch("http://localhost:5000/api/items", {
+      const res = await fetch(`${API_URL}/api/items`, {
         headers: { Authorization: `Bearer ${user.token}` },
       });
       if (!res.ok) throw new Error("Failed to fetch items");
@@ -37,7 +41,7 @@ const App = () => {
   const fetchNotifications = async () => {
     if (!user) return;
     try {
-      const res = await fetch("http://localhost:5000/api/notifications", {
+      const res = await fetch(`${API_URL}/api/notifications`, {
         headers: { Authorization: `Bearer ${user.token}` },
       });
       if (!res.ok) {
@@ -54,7 +58,7 @@ const App = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch("http://localhost:5000/api/auth/login", {
+      const res = await fetch(`${API_URL}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password, isVolunteer }),
@@ -76,7 +80,7 @@ const App = () => {
   const handleSignup = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch("http://localhost:5000/api/auth/signup", {
+      const res = await fetch(`${API_URL}/api/auth/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password, isVolunteer }),
@@ -107,7 +111,7 @@ const App = () => {
   const handlePostItem = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch("http://localhost:5000/api/items", {
+      const res = await fetch(`${API_URL}/api/items`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -126,13 +130,10 @@ const App = () => {
 
   const handleRequestItem = async (itemId) => {
     try {
-      const res = await fetch(
-        `http://localhost:5000/api/items/${itemId}/request`,
-        {
-          method: "PUT",
-          headers: { Authorization: `Bearer ${user.token}` },
-        }
-      );
+      const res = await fetch(`${API_URL}/api/items/${itemId}/request`, {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${user.token}` },
+      });
       if (!res.ok) throw new Error("Failed to request item");
       fetchItems();
     } catch (err) {
@@ -142,17 +143,14 @@ const App = () => {
 
   const handleAssignItem = async (itemId, takerId) => {
     try {
-      const res = await fetch(
-        `http://localhost:5000/api/items/${itemId}/assign`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${user.token}`,
-          },
-          body: JSON.stringify({ takerId: takerId.toString() }),
-        }
-      );
+      const res = await fetch(`${API_URL}/api/items/${itemId}/assign`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.token}`,
+        },
+        body: JSON.stringify({ takerId: takerId.toString() }),
+      });
       if (!res.ok) throw new Error("Failed to assign item");
       fetchItems();
       fetchNotifications();
@@ -163,13 +161,10 @@ const App = () => {
 
   const handleVolunteerAction = async (itemId, action) => {
     try {
-      const res = await fetch(
-        `http://localhost:5000/api/items/${itemId}/${action}`,
-        {
-          method: "PUT",
-          headers: { Authorization: `Bearer ${user.token}` },
-        }
-      );
+      const res = await fetch(`${API_URL}/api/items/${itemId}/${action}`, {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${user.token}` },
+      });
       if (!res.ok) throw new Error(`Failed to ${action} item`);
       fetchItems();
     } catch (err) {
@@ -181,9 +176,7 @@ const App = () => {
     if (!showAuth) {
       return (
         <div className="min-h-screen bg-beige-100 flex flex-col items-center justify-center p-6 relative overflow-hidden">
-          {/* Background floral illustration (placeholder) */}
           <div className="absolute inset-0 opacity-10">
-            {/* Add floral SVG or image here */}
             <div className="w-full h-full bg-[url('path-to-floral-bg')] bg-cover bg-center"></div>
           </div>
           <div className="text-center max-w-3xl z-10">
@@ -209,7 +202,6 @@ const App = () => {
                 Signup
               </button>
             </div>
-            {/* How It Works Section */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="bg-white p-6 rounded-xl shadow-lg">
                 <h3 className="text-xl font-semibold text-brown-600 uppercase mb-2">
