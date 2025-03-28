@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useEffect } from "react";
 
 const App = () => {
@@ -14,8 +13,6 @@ const App = () => {
   const [showRequests, setShowRequests] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
 
-  // Use environment variable for API URL
-  // eslint-disable-next-line no-undef
   const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
   useEffect(() => {
@@ -421,7 +418,7 @@ const App = () => {
             {items
               .filter(
                 (item) =>
-                  item.postedBy?._id === user.id &&
+                  item.postedBy?._id === user._id &&
                   (item.requestedBy?.length || 0) > 0
               )
               .map((item) => {
@@ -506,7 +503,7 @@ const App = () => {
                   ? [item.requestedBy]
                   : [];
                 const hasRequested = requestedByArray.some(
-                  (r) => r._id === user.id
+                  (r) => r._id === user._id
                 );
                 return (
                   <div
@@ -521,7 +518,7 @@ const App = () => {
                       Status: <span className="font-medium">{item.status}</span>
                     </p>
                     {item.status === "posted" &&
-                      item.postedBy?._id !== user.id &&
+                      item.postedBy?._id !== user._id &&
                       (hasRequested ? (
                         <p className="mt-3 text-green-600">Item Requested</p>
                       ) : (
@@ -533,7 +530,7 @@ const App = () => {
                         </button>
                       ))}
                     {item.status === "posted" &&
-                      item.postedBy?._id === user.id && (
+                      item.postedBy?._id === user._id && (
                         <p className="mt-3 text-brown-500">
                           Requests:{" "}
                           <span className="font-medium">
@@ -543,7 +540,7 @@ const App = () => {
                       )}
                     {item.status === "posted" &&
                       hasRequested &&
-                      item.postedBy?._id === user.id &&
+                      item.postedBy?._id === user._id &&
                       (item.assignedTo ? (
                         <p className="mt-3 text-green-600">
                           Assigned to: {item.assignedTo.email}
@@ -570,7 +567,7 @@ const App = () => {
                           ))}
                         </div>
                       ))}
-                    {item.assignedTo?._id === user.id &&
+                    {item.assignedTo?._id === user._id &&
                       item.status === "posted" && (
                         <p className="mt-3 text-green-600">
                           Assigned to you! Please pick up.
